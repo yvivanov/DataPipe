@@ -1,0 +1,80 @@
+# YI 2021-05-30 20:00
+connectMS: Server=192.168.120.177;Database=TBOSRPT;Driver={SQL Server};UID=rptuser;PWD=ntt@rptus$r  # LSIORB
+connectMy: Server=127.0.0.1;Database=STAR;charset=utf8mb4;Driver=MySQL ODBC 8.0 ANSI Driver;UID=root;PWD=dummy
+
+actuality: 2     # days retro-scan for data pipes where "review" is true
+precision: 2     # sec if abs(ts1 + GMT_local - ts2) >= precision, then update
+GMT_local: 25200 # sec, add 28800 8h PST or 25200 7h PDT to GMT to have local *datetime*
+chunksize: 10000 # chunk size for batch select/insert processing
+
+#  00..99  up to 100 tables in parallel, incremental update
+submit_01: false
+review_01: false
+repeat_01: 42      #  7h
+syncms_01: 600000  # 10m
+db_src_01: mssql
+source_01: Reporting.AccountActivities
+db_tgt_01: mysql
+target_01: lsiorb.fact_account_event
+fields_01: [Cust_ActivityId,AccountNumber,Store,Location,Amount,Category,SubCategory,Department,ActivityType,ActivityTypeDesc,ActivityDate,City,State,Zip,APPTXNTYPECODE,SourceOfPayment,ICNID,EmployeeId,EmployeeName,CreatedBy,CreatedDate,UpdatedBy,UpdatedDate]
+
+submit_02: false   # synchronize
+review_02: false   # no retro-scan, changes not expected
+repeat_02: 28      #  7h
+syncms_02: 900000  # 15m
+db_src_02: mssql
+source_02: Reporting.AccountMaster
+db_tgt_02: mysql
+target_02: lsiorb.dim_account  # _mssql
+fields_02: [AccountNumber,AccountType,AccountFirstName,AccountLastName,AccountCurrentStatus,AccountCurrentStatusDate,CreatedUser,CreatedDate,UpdatedUser,UpdatedDate]
+
+submit_03: false
+review_03: false
+repeat_03: 35      # 7h
+syncms_03: 720000  # 12m
+db_src_03: mssql
+source_03: Reporting.TollSummary_Posted
+db_tgt_03: mysql
+target_03: lsiorb.fact_toll_posted  # NO UPDATE SYNC (review false)
+fields_03: [AgencyId,LocationId,ReceivedDate,TransactionDate,PostedDate,TripIdentMethod,SourceOfEntry,TripWith,IsNonRevenue,TripCount,TransactionAmount,PostedAmount,CollectionAmount,UnRealizedAmount]
+
+submit_04: false
+review_04: false
+repeat_04: 7        # 7h
+syncms_04: 3600000  # 1h
+db_src_04: mssql
+source_04: Reporting.Agencies
+db_tgt_04: mysql
+target_04: lsiorb.dim_agency
+fields_04: [AGENCYID,AGENCYNAME,AGENCYCODE,ISACTIVE,STARTEFFECTIVEDATE,ENDEFFECTIVEDATE,CREATEDUSER,CREATEDDATE,UPDATEDUSER,UPDATEDDATE]
+
+submit_05: false
+review_05: false
+repeat_05: 35      # 7h
+syncms_05: 720000  # 12m
+db_src_05: mssql
+source_05: Reporting.TollSummary_Intransit
+db_tgt_05: mysql
+target_05: lsiorb.fact_toll_intransit  # NO UPDATE SYNC (review false)
+fields_05: [AgencyId,LocationId,ReceivedDate,TransactionDate,TripIdentMethod,TripStatus,TripCount,TransactionAmount]
+
+submit_06: false
+review_06: false
+repeat_06: 35      # 7h
+syncms_06: 720000  # 12m
+db_src_06: mssql
+source_06: Reporting.RejectedTollDetails
+db_tgt_06: mysql
+target_06: lsiorb.fact_toll_rejected
+fields_06: [TPTRIPID,TRIPSTATUSID,REASONCODE,TRIPIDENTMETHOD,EXITPLAZAID,ReceivedTollAmount,LOCATIONID,AGENCYID,EXITTRIPDATETIME,TRIPSTATUSDATE,ReceivedDate,POSTEDDATE,UPDATEDDATE]
+
+submit_07: false
+review_07: false
+repeat_07: 7        # 7h
+syncms_07: 3600000  # 1h
+db_src_07: mssql
+source_07: Reporting.Plazas
+db_tgt_07: mysql
+target_07: lsiorb.dim_plaza
+fields_07: [PLAZAID,PLAZACODE,PLAZANAME,UPDATEDDATE]
+
