@@ -1,1 +1,1 @@
-Multi-theaded data pipe based on Python 3
+Multi-theaded data pipe based on Python and incremental SQL
